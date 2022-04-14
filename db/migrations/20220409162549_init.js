@@ -7,8 +7,9 @@ exports.up = function(knex) {
       table.increments('id');
       table.string('name').notNullable();
       table.string('email').notNullable().unique();
-      tablша
-      table.boolean('isEmployee');
+      table.string('photo');
+      table.boolean('isEmployee').notNullable().defaultTo(false);
+      table.string('position');
       table.timestamps(true, true);
   })
 };
@@ -18,5 +19,5 @@ exports.up = function(knex) {
  * @returns { Promise<void> }
  */
 exports.down = function(knex) {
-  return knex.schema.dropTable('users');
+  return knex.schema.dropTableIfExists('users');
 };
