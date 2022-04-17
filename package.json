@@ -6,6 +6,7 @@
   "scripts": {
     "start": "nodemon index.js",
     "migrate": "npx knex migrate:latest --knexfile ./db/knexfile.js",
+    "migrate:down": "npx knex migrate:down --knexfile ./db/knexfile.js",
     "migration:make": "cross-var npx knex migrate:make $npm_config_name --knexfile ./db/knexfile.js --client mysql2",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -19,6 +20,7 @@
     "knex": "^1.0.5",
     "mysql2": "^2.3.3",
     "nodemon": "^2.0.15",
-    "objection": "^3.0.1"
+    "objection": "^3.0.1",
+    "pg": "^8.7.3"
   }
 }
