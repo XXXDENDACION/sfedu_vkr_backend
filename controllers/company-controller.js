@@ -26,7 +26,14 @@ module.exports = {
       const { id } = req.params;
       const company = await Company.query()
         .findById(id)
-        .withGraphFetched("departments");
+        .select('id', 'name')
+        .withGraphFetched("departments(selectMainFields)")
+        .modifiers({
+          selectMainFields(builder) {
+            builder.select('id', 'name')
+          }
+        })
+        .withGraphFetched("ownerId");
 
       if (!company) {
         return res.json("Company have not exist");
