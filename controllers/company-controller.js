@@ -17,9 +17,24 @@ module.exports = {
       });
       res.json(company);
     } catch (e) {
-      console.error(e);
       res.json(e);
       res.status(500);
+    }
+  },
+  getCompanyDetails: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const company = await Company.query()
+        .findById(id)
+        .withGraphFetched("departments");
+
+      if (!company) {
+        return res.json("Company have not exist");
+      }
+
+      res.json(company);
+    } catch (e) {
+      res.json(e);
     }
   },
 };
