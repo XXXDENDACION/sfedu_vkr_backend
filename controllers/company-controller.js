@@ -26,14 +26,14 @@ module.exports = {
       const { id } = req.params;
       const company = await Company.query()
         .findById(id)
-        .select('id', 'name')
-        .withGraphFetched("departments(selectMainFields)")
-        .modifiers({
-          selectMainFields(builder) {
-            builder.select('id', 'name')
-          }
+        .select("id", "name")
+        .withGraphFetched({
+          departments: {
+            $modify: ["selectMainFields"],
+            members: true,
+          },
         })
-        .withGraphFetched("ownerId");
+        .withGraphFetched("owner");
 
       if (!company) {
         return res.json("Company have not exist");

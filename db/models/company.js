@@ -17,14 +17,14 @@ class Company extends Model {
           to: "department.companyId",
         },
       },
-      ownerId: {
+      owner: {
         relation: Model.HasOneRelation,
         modelClass: User,
         join: {
           from: "company.userId",
-          to: "users.id"
-        }
-      }
+          to: "users.id",
+        },
+      },
     };
   }
 }

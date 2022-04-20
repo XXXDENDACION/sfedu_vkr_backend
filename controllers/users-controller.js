@@ -11,6 +11,24 @@ module.exports = {
     }
   },
 
+  getEmployeeFromCompany: async (req, res) => {
+    try {
+      const { companyId } = req.params;
+
+      const users = await User.query()
+        .where({
+          companyId: companyId,
+          isEmployee: true,
+        })
+        .select("id", "firstName", "lastName", "position", "age");
+
+      res.json(users);
+    } catch (err) {
+      console.log(err);
+      res.status(500);
+    }
+  },
+
   addUp: async (req, res) => {
     try {
       const { name, email, photo, isEmployee, position } = req.body;
@@ -34,13 +52,9 @@ module.exports = {
 
   patchUp: async (req, res) => {
     try {
-      const { id, name, email, photo, isEmployee, position } = req.body;
+      const { id, ...rest } = req.body;
       const patchedUser = await User.query().patchAndFetchById(id, {
-        name,
-        email,
-        photo,
-        isEmployee,
-        position,
+        ...rest,
       });
       res.json(patchedUser);
     } catch (e) {

@@ -5,15 +5,23 @@ class Department extends Model {
     return "department";
   }
 
-  static get relationMappings() {
-    const Company = require("./company");
+  static get modifiers() {
     return {
-      departments: {
-        relation: Model.HasOneRelation,
-        modelClass: Company,
+      selectMainFields(builder) {
+        builder.select("id", "name");
+      },
+    };
+  }
+
+  static get relationMappings() {
+    const User = require("./user");
+    return {
+      members: {
+        relation: Model.HasManyRelation,
+        modelClass: User,
         join: {
-          from: "department.companyId",
-          to: "company.id",
+          from: "department.id",
+          to: "users.departmentId",
         },
       },
     };
