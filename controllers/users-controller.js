@@ -1,4 +1,7 @@
 const User = require("../db/models/user");
+const Skill = require("../db/models/skills");
+const Role = require("../db/models/roles");
+const Departments = require("../db/models/department");
 
 module.exports = {
   getAll: async (req, res) => {
@@ -11,15 +14,46 @@ module.exports = {
     }
   },
 
-  getEmployeeFromCompany: async (req, res) => {
+  getFilters: async (req, res) => {
     try {
       const { companyId } = req.params;
+      const skills = await Skill.query();
+      const roles = await Role.query();
+      const departments = await Departments.query().where({
+        companyId
+      }).select('id', 'name');
+      res.json({
+        skills,
+        roles,
+        departments
+      })
+    } catch (err) {
+      console.error(err);
+    }
+  },
+
+  getEmployeeFromCompany: async (req, res) => {
+    try {
+      console.log("TEST");
+      const { companyId } = req.params;
+      const { skillId, roleId, departmentId } = req.body;
+
+      const filterParameters = {
+        skillId,
+        roleId,
+        departmentId
+      };
+
+      Object.keys(filterParameters).forEach(key => (
+        !filterParameters[key] ? delete filterParameters[key] : {}
+      ))
 
       const users = await User.query()
         .where({
           companyId: companyId,
           isEmployee: true,
         })
+        .where(filterParameters)
         .select("id", "firstName", "lastName", "position", "age");
 
       res.json(users);
@@ -31,18 +65,20 @@ module.exports = {
 
   addUp: async (req, res) => {
     try {
-      const { name, email, photo, isEmployee, position } = req.body;
+      const { firstName, lastName, email, photo, isEmployee, roleId, skills } = req.body;
       const isExist = (await User.query().where("email", email)).length;
       if (!!isExist) {
         return res.json("Email is already exist");
       }
-      const user = await User.query().insert({
-        name,
+      const user = await User.relatedQuery('skills').for(skills).insert({
+        firstName,
+        lastName,
         email,
         photo,
         isEmployee,
-        position,
+        roleId
       });
+
       res.json(user);
     } catch (e) {
       console.error(e);

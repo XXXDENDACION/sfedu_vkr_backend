@@ -1,6 +1,6 @@
 /**
  * @param { import("knex").Knex } knex
- * @returns { Promise<void> }
+ * @returns { Promise<void> }Skill
  */
 exports.up = function (knex) {
   return knex.schema
@@ -12,10 +12,14 @@ exports.up = function (knex) {
       table.increments();
       table.string("role").notNullable().unique();
     })
-    .alterTable("users", (table) => {
-      table.integer("roleId").references("id").inTable("roles");
-      table.integer("skillId").references("id").inTable("skills");
-    });
+    .createTable("users_skills", (table) => {
+        table.increments('id').primary();
+        table.integer('userId').references('id').inTable('users');
+        table.integer('skillId').references('id').inTable('skills')
+    })
+    .alterTable('users', (table) => {
+      table.integer('roleId').references('id').inTable('roles');
+    })
 };
 
 /**
@@ -24,10 +28,10 @@ exports.up = function (knex) {
  */
 exports.down = function (knex) {
   return knex.schema
-    .alterTable("users", (table) => {
-      table.dropColumn("roleId");
-      table.dropColumn("skillId");
+    .alterTable('users', (table) => {
+      table.dropColumn('roleId');
     })
+    .dropTableIfExists("users_skills")
     .dropTableIfExists("skills")
-    .dropTableIfExists("roles");
+    .dropTableIfExists("roles")
 };
