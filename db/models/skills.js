@@ -6,21 +6,21 @@ class Skill extends Model {
   }
 
   static get relationMappings() {
-    const User = require('./user');
+    const User = require("./user");
     return {
       skills: {
         relation: Model.ManyToManyRelation,
         modelClass: User,
         join: {
-          from: 'skills.id',
+          from: "skills.id",
           through: {
             from: "users_skills.skillId",
-            to: "users_skills.userId"
+            to: "users_skills.userId",
           },
-          to: 'users.id'
-        }
-      }
-    }
+          to: "users.id",
+        },
+      },
+    };
   }
 }
 

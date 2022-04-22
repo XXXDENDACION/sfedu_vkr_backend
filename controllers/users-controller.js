@@ -19,14 +19,16 @@ module.exports = {
       const { companyId } = req.params;
       const skills = await Skill.query();
       const roles = await Role.query();
-      const departments = await Departments.query().where({
-        companyId
-      }).select('id', 'name');
+      const departments = await Departments.query()
+        .where({
+          companyId,
+        })
+        .select("id", "name");
       res.json({
         skills,
         roles,
-        departments
-      })
+        departments,
+      });
     } catch (err) {
       console.error(err);
     }
@@ -36,25 +38,36 @@ module.exports = {
     try {
       console.log("TEST");
       const { companyId } = req.params;
-      const { skillId, roleId, departmentId } = req.body;
+      const { filters } = req.body;
 
       const filterParameters = {
-        skillId,
-        roleId,
-        departmentId
+        roleId: filters?.roles,
+        departmentId: filters?.departments,
       };
 
-      Object.keys(filterParameters).forEach(key => (
-        !filterParameters[key] ? delete filterParameters[key] : {}
-      ))
+      const relatedParameters = {
+        skillId: filters?.skills,
+      };
 
-      const users = await User.query()
+      Object.keys(filterParameters).forEach((key) =>
+        !filterParameters[key] ? delete filterParameters[key] : {}
+      );
+
+      const usersQuery = User.query()
         .where({
           companyId: companyId,
           isEmployee: true,
         })
         .where(filterParameters)
-        .select("id", "firstName", "lastName", "position", "age");
+        .select("id", "firstName", "lastName", "position", "age")
+        .withGraphFetched("role")
+        .withGraphFetched("skills");
+
+      const users = filters?.skills
+        ? await User.relatedQuery("skills")
+            .for(usersQuery)
+            .where(relatedParameters)
+        : await usersQuery;
 
       res.json(users);
     } catch (err) {
@@ -65,20 +78,18 @@ module.exports = {
 
   addUp: async (req, res) => {
     try {
-      const { firstName, lastName, email, photo, isEmployee, roleId, skills } = req.body;
-      const isExist = (await User.query().where("email", email)).length;
+      const { ...data } = req.body;
+      const isExist = (await User.query().where("email", data.email)).length;
       if (!!isExist) {
         return res.json("Email is already exist");
       }
-      const user = await User.relatedQuery('skills').for(skills).insert({
-        firstName,
-        lastName,
-        email,
-        photo,
-        isEmployee,
-        roleId
+      const user = await User.query().insert({
+        ...data,
       });
 
+      if (data.skills) {
+        await User.relatedQuery("skills").for(user.id).relate(data.skills);
+      }
       res.json(user);
     } catch (e) {
       console.error(e);
