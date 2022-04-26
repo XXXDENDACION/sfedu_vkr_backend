@@ -8,7 +8,7 @@ class Skill extends Model {
   static get relationMappings() {
     const User = require("./user");
     return {
-      skills: {
+      users: {
         relation: Model.ManyToManyRelation,
         modelClass: User,
         join: {

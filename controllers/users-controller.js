@@ -53,7 +53,11 @@ module.exports = {
         !filterParameters[key] ? delete filterParameters[key] : {}
       );
 
-      const usersQuery = User.query()
+      Object.keys(relatedParameters).forEach((key) =>
+        !relatedParameters[key] ? delete relatedParameters[key] : {}
+      );
+
+      const filteredUsers = User.query()
         .where({
           companyId: companyId,
           isEmployee: true,
@@ -63,11 +67,15 @@ module.exports = {
         .withGraphFetched("role")
         .withGraphFetched("skills");
 
+      const currentSkills = filters?.skills
+        ? Skill.query().where(filterParameters)
+        : null;
+
       const users = filters?.skills
-        ? await User.relatedQuery("skills")
-            .for(usersQuery)
-            .where(relatedParameters)
-        : await usersQuery;
+        ? await Skill.relatedQuery('users').for(currentSkills).where(relatedParameters)
+          .withGraphFetched("role")
+          .withGraphFetched("skills")
+        : await filteredUsers;
 
       res.json(users);
     } catch (err) {
