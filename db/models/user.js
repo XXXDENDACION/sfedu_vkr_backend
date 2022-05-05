@@ -1,5 +1,4 @@
 const { Model } = require("objection");
-const Role = require("./roles");
 
 class User extends Model {
   static get tableName() {
@@ -8,6 +7,9 @@ class User extends Model {
 
   static get relationMappings() {
     const Skills = require("./skills");
+    const Role = require("./roles");
+    const Department = require("./department");
+    const Events = require("./event");
     return {
       role: {
         relation: Model.HasOneRelation,
@@ -27,6 +29,26 @@ class User extends Model {
             to: "users_skills.skillId",
           },
           to: "skills.id",
+        },
+      },
+      events: {
+        relation: Model.ManyToManyRelation,
+        modelClass: Events,
+        join: {
+          from: "users.id",
+          through: {
+            from: "participantsOfEvents.userId",
+            to: "participantsOfEvents.eventId",
+          },
+          to: "events.id",
+        },
+      },
+      department: {
+        relation: Model.HasOneRelation,
+        modelClass: Department,
+        join: {
+          from: "users.departmentId",
+          to: "department.id",
         },
       },
     };

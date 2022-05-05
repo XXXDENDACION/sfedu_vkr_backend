@@ -34,9 +34,23 @@ module.exports = {
     }
   },
 
+  getDetailsEmployee: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await User.query()
+        .findById(id)
+        .withGraphFetched("role")
+        .withGraphFetched("skills")
+        .withGraphFetched("department");
+      res.json(user);
+    } catch (e) {
+      console.log(e);
+      res.status(500);
+    }
+  },
+
   getEmployeeFromCompany: async (req, res) => {
     try {
-      console.log("TEST");
       const { companyId } = req.params;
       const { filters } = req.body;
 
@@ -65,16 +79,20 @@ module.exports = {
         .where(filterParameters)
         .select("id", "firstName", "lastName", "position", "age")
         .withGraphFetched("role")
-        .withGraphFetched("skills");
+        .withGraphFetched("skills")
+        .withGraphFetched("department");
 
       const currentSkills = filters?.skills
         ? Skill.query().where(filterParameters)
         : null;
 
       const users = filters?.skills
-        ? await Skill.relatedQuery('users').for(currentSkills).where(relatedParameters)
-          .withGraphFetched("role")
-          .withGraphFetched("skills")
+        ? await Skill.relatedQuery("users")
+            .for(currentSkills)
+            .where(relatedParameters)
+            .withGraphFetched("role")
+            .withGraphFetched("skills")
+            .withGraphFetched("department")
         : await filteredUsers;
 
       res.json(users);
