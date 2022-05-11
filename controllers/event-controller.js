@@ -4,18 +4,22 @@ const User = require("../db/models/user");
 module.exports = {
   addEvent: async (req, res) => {
     try {
-      const { title, description, ownerId, calendarId, participants } =
+      const { title, description, ownerId, start, end, participants } =
         req.body;
 
       const newEvent = await Event.query().insert({
         title,
         description,
         ownerId,
+        start,
+        end,
         // calendarId,
       });
 
       if (participants) {
-        await Event.relatedQuery("users").for(newEvent.id).relate(participants);
+        await Event.relatedQuery("participants")
+          .for(newEvent.id)
+          .relate([...participants, ownerId]);
       }
 
       res.json(newEvent);
@@ -30,7 +34,9 @@ module.exports = {
 
       const currentUser = User.query().where({ id: userId });
 
-      const events = await User.relatedQuery("events").for(currentUser);
+      const events = await User.relatedQuery("events")
+        .for(currentUser)
+        .withGraphFetched("participants");
 
       res.json(events);
     } catch (e) {

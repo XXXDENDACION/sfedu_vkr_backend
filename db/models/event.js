@@ -8,7 +8,7 @@ class Event extends Model {
   static get relationMappings() {
     const User = require("./user");
     return {
-      users: {
+      participants: {
         relation: Model.ManyToManyRelation,
         modelClass: User,
         join: {
